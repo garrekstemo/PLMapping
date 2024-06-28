@@ -8,7 +8,6 @@ export
     find_area
 
 using DelimitedFiles
-using LsqFit
 using Peaks
 using Optim
 using SignalFiltering

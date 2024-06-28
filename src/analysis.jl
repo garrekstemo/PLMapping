@@ -37,28 +37,26 @@ function find_area(spectrum, background, λ_0)
     fit = nothing
     x = spectrum[:, 1]
     y = spectrum[:, 2]
-    y = y .- background
-    y = median_filter(y, 5)
+    y = median_filter(y .- background, 5)
     if y == zeros(length(y))
         return area, fit, y
     end
 
-    p0 = [5000.0, λ_0, 15.0]
-    # fit = curve_fit(lorentzian, x, y, p0)
+    y_max = maximum(y)
+    γ_guess = 15.0
+    p0 = [2000.0, λ_0, γ_guess]
     fit = optimize(b -> squared_error(b, x, y), p0)
     params = Optim.minimizer(fit)
     if discard_poor_fit(params, λ_0)
         fit = nothing
+    else
+        area = trapezoid(x, lorentzian(x, params))
     end
-    area = trapezoid(x, lorentzian(x, params))
-    # if discard_poor_fit(fit, λ_0)
-    #     fit = nothing
-    # end
     return area, fit, y
 end
 
 function discard_poor_fit(params, center)
-    if params[2] < center - 50 || params[2] > center + 50 || params[3] < 0
+    if params[1] < 0 || params[2] < center - 70 || params[2] > center + 70 || params[3] < 0 || params[3] > 50
         return true
     end
     return false
