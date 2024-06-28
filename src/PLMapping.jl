@@ -10,6 +10,7 @@ export
 using DelimitedFiles
 using LsqFit
 using Peaks
+using Optim
 using SignalFiltering
 
 include("analysis.jl")
