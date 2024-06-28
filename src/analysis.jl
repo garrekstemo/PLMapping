@@ -51,5 +51,5 @@ function find_area(spectrum, background, λ_0)
         fit = curve_fit(lorentzian, x, y, p0)
         area = trapezoid(x, lorentzian(x, fit.param))
     end
-    return area
+    return area, fit
 end
