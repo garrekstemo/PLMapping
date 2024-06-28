@@ -3,7 +3,6 @@ function lorentzian(ω, p)
     return @. A * γ / ((ω - ω₀)^2 +  γ^2) / π
 end
 
-
 function trapezoid(x, y)
     area = 0
     i = 1
@@ -47,20 +46,19 @@ function find_area(spectrum, background, λ_0)
     p0 = [5000.0, λ_0, 15.0]
     # fit = curve_fit(lorentzian, x, y, p0)
     fit = optimize(b -> squared_error(b, x, y), p0)
-    area = trapezoid(x, lorentzian(x, fit.param))
+    params = Optim.minimizer(fit)
+    if discard_poor_fit(params, λ_0)
+        fit = nothing
+    end
+    area = trapezoid(x, lorentzian(x, params))
     # if discard_poor_fit(fit, λ_0)
     #     fit = nothing
     # end
     return area, fit, y
 end
 
-function discard_poor_fit(fit, center)
-    # if fit === nothing
-    #     println("no fit available")
-    #     return true
-    # end
-    if fit.param[1] < 200 || fit.param[1] > 20000 || fit.param[2] < (center - 20) || fit.param[2] > (center + 20) || fit.param[3] < 5 || fit.param[3] > 23
-        # println(fit.param)
+function discard_poor_fit(params, center)
+    if params[2] < center - 50 || params[2] > center + 50 || params[3] < 0
         return true
     end
     return false
